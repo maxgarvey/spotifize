@@ -15,7 +15,7 @@ class searcher(object):
         self.curl_obj = pycurl.Curl()
         self.saved_results = []
 
-    def search(self, search_string, save_results=False, search_field='album'):
+    def search(self, search_string, save_results=False, search_field='album', page=1):
         '''this method will search a given search string'''
 
         #this block resets the cStringIO obj
@@ -29,7 +29,8 @@ class searcher(object):
 
         #here is the pycurl stuff for the lookup
         self.curl_obj.setopt(self.curl_obj.URL,
-            "http://ws.spotify.com/search/1/{0}?q={1}".format(search_field, http_string))
+            "http://ws.spotify.com/search/1/{0}?q={1}&page={2}"\
+                .format(search_field, http_string, page))
         self.curl_obj.setopt(self.curl_obj.WRITEFUNCTION, self.results_string_io.write)
         self.curl_obj.perform()
 
@@ -50,6 +51,8 @@ if __name__ == "__main__":
     parser.add_argument('-s', dest="search_field", action="store", default='album',
         help="what field to search. default is 'album', other allowed" + \
             " variables are 'artist' and 'track'")
+    parser.add_argument('-p', dest="page", action="store", default='1',
+        help="the page of results you would like to receive.")
     parser.add_argument('search_term', metavar="<SEARCH TERM>", nargs="+",
         help="the term or terms to search for")
     #print "search_term: {0}".format(search_term) #debug
@@ -58,9 +61,9 @@ if __name__ == "__main__":
     #print "running search" #debug
     args = parser.parse_args()
     print "args: {}".format(args) #debug
-    print " ".join(args.search_term) #debug
+    #print " ".join(args.search_term) #debug
     search_term = " ".join(args.search_term)
-    result = my_searcher.search(search_term, False, args.search_field)
+    result = my_searcher.search(search_term, False, args.search_field, args.page)
     if args.to_file is '':
         print result #debug
     else:
